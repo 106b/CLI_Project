@@ -5,6 +5,7 @@
 
 #define TRUE 1
 #define FALSE 0
+#define MAX_SIZE 2048
 
 struct entryNode {
 	char * name;
@@ -22,6 +23,7 @@ struct entryNode * root;
 /* Helper functions */
 void pwdHelper (struct entryNode *);
 struct entryNode * located (char *, struct entryNode *);
+void addEntry (struct entryNode *entryList, struct entryNode *newEntry);
 
 /* Return an initialized file system (an empty directory named "/") 
    after storing it in the root variable. */
@@ -58,12 +60,30 @@ void createFile (struct entryNode * wd, char * fileName) {
 
 		//set members of new directory
 		newFile->name = strdup(fileName);
-		newFile->next = NULL
+		newFile->next = NULL;
 		newFile->isDirectory = FALSE;
 		newFile->parent = wd;
 
-		//add code to enter file contents from user input
+		// add code to enter file contents from user input
+		char line[MAX_SIZE];
+		newFile->entry.contents = NULL;
+
+	
+	 // MAXLINESIZE + 1 leaves room for the null byte added by fgets().
+		newFile->entry.contents = malloc(MAX_SIZE + 1);
+		if (newFile->entry.contents == NULL) {
+			// out of space
+			exit(1);
+		}
+
+		printf("enter file contents: \n");
+    	while(fgets(line, MAX_SIZE + 1, stdin) != NULL && strcmp(line, "\n") != 0){
+     	//process line   
+        	strcat(newFile->entry.contents, line);
+    	}
+
 		//add file to entry list
+		addEntry(wd, newFile);
 
 
 
@@ -90,32 +110,10 @@ void createDir (struct entryNode * wd, char * dirName) {
 		newDir->next = NULL;
 		newDir->isDirectory = TRUE;		
 		newDir->parent = wd;			
-		newDir->entry.contents = NULL; 	
+		newDir->entry.contents = NULL;
 
-		//add directory to entrylist in alphabetical order
-		int check; //string  return value check
-		if(wd->entry.entryList == NULL){
-			//entry list is empty
-			wd->entry.entryList = newDir;
-		} else if((check = strcmp(newDir->name, wd->entry.entryList->name) < 0)){
-			//enter at head
-			newDir->next = wd->entry.entryList;
-			wd->entry.entryList = newDir;
-		} else {
-			//enter anywhere else
-			struct entryNode *currEntry;
-			struct entryNode *prevEntry;
-			struct entryNode *nextEntry;
-			currEntry = wd->entry.entryList;
-			//stop traversing at end of the list or when new name is less than next name
-			while(currEntry != NULL && (check = strcmp(newDir->name, currEntry->name) > 0)){
-				prevEntry = currEntry;
-				currEntry = currEntry->next;
-			}
-			nextEntry = prevEntry->next;
-			prevEntry->next = newDir;
-			newDir->next = nextEntry;
-		}	
+		//add new directory to working directory
+		addEntry(wd, newDir);
 	}
 }
 
@@ -282,4 +280,30 @@ struct entryNode * located (char * name, struct entryNode * list) {
 	} else {
 		return located (name, list->next);
 	}
+}
+
+void addEntry (struct entryNode *wd, struct entryNode *newEntry){
+	int check; //string  return value check
+	if(wd->entry.entryList == NULL){
+		//entry list is empty
+		wd->entry.entryList = newEntry;
+	} else if((check = strcmp(newEntry->name, wd->entry.entryList->name) < 0)){
+		//enter at head
+		newEntry->next = wd->entry.entryList;
+		wd->entry.entryList = newEntry;
+	} else {
+		//enter anywhere else
+		struct entryNode *currEntry;
+		struct entryNode *prevEntry;
+		struct entryNode *nextEntry;
+		currEntry = wd->entry.entryList;
+		//stop traversing at end of the list or when new name is less than next name
+		while(currEntry != NULL && (check = strcmp(newEntry->name, currEntry->name) > 0)){
+			prevEntry = currEntry;
+			currEntry = currEntry->next;
+		}
+		nextEntry = prevEntry->next;
+		prevEntry->next = newEntry;
+		newEntry->next = nextEntry;
+	}	
 }
