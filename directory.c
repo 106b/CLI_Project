@@ -23,6 +23,7 @@ struct entryNode * root;
 /* Helper functions */
 void pwdHelper (struct entryNode *);
 struct entryNode * located (char *, struct entryNode *);
+struct entryNode * locatePrevious (char *, struct entryNode *); 
 void addEntry (struct entryNode *entryList, struct entryNode *newEntry);
 
 /* Return an initialized file system (an empty directory named "/") 
@@ -68,7 +69,6 @@ void createFile (struct entryNode * wd, char * fileName) {
 		char line[MAX_SIZE];
 		newFile->entry.contents = NULL;
 
-	
 	 // MAXLINESIZE + 1 leaves room for the null byte added by fgets().
 		newFile->entry.contents = malloc(MAX_SIZE + 1);
 		if (newFile->entry.contents == NULL) {
@@ -83,11 +83,7 @@ void createFile (struct entryNode * wd, char * fileName) {
     	}
 
 		//add file to entry list
-		addEntry(wd, newFile);
-
-
-
-		
+		addEntry(wd, newFile);	
 	}
 }
 
@@ -128,7 +124,30 @@ void removeFile (struct entryNode * wd, char * fileName) {
 	} else if (file->isDirectory) {
 		printf ("rm: %s: is a directory.\n", fileName);
 	} else {
-		/* YOU SUPPLY THIS CODE. */
+		//rm head file
+		if(wd->entry.entryList == file ){
+			wd->entry.entryList = file->next;
+			free(file->entry.contents);
+			file->entry.contents = NULL;
+			free(file);
+			file->next = NULL;
+			file->parent = NULL;
+		} else {
+			//rm any other file
+			struct entryNode * filePrevious;
+			filePrevious = locatePrevious(fileName, wd->entry.entryList);
+
+			filePrevious->next = file->next;
+			free(file->entry.contents);
+			file->entry.contents = NULL;
+			free(file);
+			file->next = NULL;
+			file->parent = NULL;
+
+		}
+		
+
+		
 	}
 }
 
@@ -281,7 +300,16 @@ struct entryNode * located (char * name, struct entryNode * list) {
 		return located (name, list->next);
 	}
 }
-
+//return file of previous file
+struct entryNode * locatePrevious (char * name, struct entryNode * list) {
+	if (list == NULL) {
+		return NULL;
+	} else if (strcmp (list->next->name, name) == 0) {
+		return list;
+	} else {
+		return locatePrevious (name, list->next);
+	}
+}
 void addEntry (struct entryNode *wd, struct entryNode *newEntry){
 	int check; //string  return value check
 	if(wd->entry.entryList == NULL){
