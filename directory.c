@@ -143,11 +143,7 @@ void removeFile (struct entryNode * wd, char * fileName) {
 			free(file);
 			file->next = NULL;
 			file->parent = NULL;
-
 		}
-		
-
-		
 	}
 }
 
@@ -164,7 +160,25 @@ void removeDir (struct entryNode * wd, char * dirName) {
 	} else if (dir->entry.entryList != NULL) {
 		printf ("rmdir: %s: Directory not empty\n", dirName);
 	} else {
-		/* YOU SUPPLY THIS CODE. */
+		if(wd->entry.entryList == dir ){
+			wd->entry.entryList = dir->next;
+			free(dir->entry.entryList);
+			dir->entry.entryList = NULL;
+			free(dir);
+			dir->next = NULL;
+			dir->parent = NULL;
+		} else {
+			//rm any other file
+			struct entryNode * dirPrevious;
+			dirPrevious = locatePrevious(dirName, wd->entry.entryList);
+
+			dirPrevious->next = dir->next;
+			free(dir->entry.entryList);
+			dir->entry.entryList = NULL;
+			free(dir);
+			dir->next = NULL;
+			dir->parent = NULL;
+		}
 	}
 }
 
@@ -180,8 +194,25 @@ void copyFile (struct entryNode * wd, char * from, char * to) {
 	file = located (from, wd->entry.entryList);
 	if (file == NULL) {
 		printf ("cp: %s: No such file or directory.\n", from);
+	} else if (located(to, wd->entry.entryList)){
+		printf ("cp: %s: File exists\n", to);
 	} else {
-		/* YOU SUPPLY THIS CODE. */
+		//struct entryNode *copyFile = malloc(sizeof(struct entryNode));
+		if(copyFile == NULL){
+			printf("could not allocate memory\n");
+			exit(1);
+		}
+		if(file->isDirectory){
+			//copy attributes and entrylist
+			printf("copying directory\n");
+			//create deep copy of  file entryList and point to copyFile's entry List
+			//copyFile->entry.entryList = copyEntryList(file, copyFile);
+
+		} else {
+			//copy attributes and contents
+			printf("copying file\n");
+
+		}
 	}
 }
 
@@ -199,8 +230,10 @@ void moveFile (struct entryNode * wd, char * from, char * to) {
 	file = located (from, wd->entry.entryList);
 	if (file == NULL) {
 		printf ("mv: %s: No such file or directory.\n", from);
+	} else if (located(to, wd->entry.entryList)){
+		printf ("mv: %s: File exists\n", to);
 	} else {
-		/* YOU SUPPLY THIS CODE. */
+		if(file)
 	}
 }
 
