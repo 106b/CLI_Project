@@ -197,22 +197,9 @@ void copyFile (struct entryNode * wd, char * from, char * to) {
 	} else if (located(to, wd->entry.entryList)){
 		printf ("cp: %s: File exists\n", to);
 	} else {
-		//struct entryNode *copyFile = malloc(sizeof(struct entryNode));
-		if(copyFile == NULL){
-			printf("could not allocate memory\n");
-			exit(1);
-		}
-		if(file->isDirectory){
-			//copy attributes and entrylist
-			printf("copying directory\n");
-			//create deep copy of  file entryList and point to copyFile's entry List
-			//copyFile->entry.entryList = copyEntryList(file, copyFile);
+		
 
-		} else {
-			//copy attributes and contents
-			printf("copying file\n");
-
-		}
+		
 	}
 }
 
@@ -227,13 +214,35 @@ void copyFile (struct entryNode * wd, char * from, char * to) {
  */
 void moveFile (struct entryNode * wd, char * from, char * to) {
 	struct entryNode * file;
+	struct entryNode * copyFile;
 	file = located (from, wd->entry.entryList);
 	if (file == NULL) {
 		printf ("mv: %s: No such file or directory.\n", from);
-	} else if (located(to, wd->entry.entryList)){
-		printf ("mv: %s: File exists\n", to);
 	} else {
-		if(file)
+		copyFile = located(to, wd->entry.entryList);
+		if(copyFile == NULL){
+			printf("moving file\n");
+			copyFile = malloc(sizeof(struct entryNode));
+			if(copyFile == NULL){
+				printf("no memory\n");
+				exit(1);
+			}
+			copyFile->name = strdup(to);
+			copyFile->entry.contents = strdup(file->entry.contents);
+			copyFile->parent = wd;
+			copyFile->next = NULL;
+			copyFile->isDirectory = FALSE;
+			removeFile(wd, from);
+			addEntry(wd, copyFile);
+
+		} else if (copyFile->isDirectory == FALSE){
+			//rm 'from' file, rename it, replace it in wd
+			printf ("mv: %s: File exists.\n", to);
+		} else {
+			printf("moving into directory\n");
+			copyFile = located(to, )
+		}
+		
 	}
 }
 
