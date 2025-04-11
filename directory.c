@@ -234,13 +234,27 @@ void moveFile (struct entryNode * wd, char * from, char * to) {
 			copyFile->isDirectory = FALSE;
 			removeFile(wd, from);
 			addEntry(wd, copyFile);
-
 		} else if (copyFile->isDirectory == FALSE){
-			//rm 'from' file, rename it, replace it in wd
 			printf ("mv: %s: File exists.\n", to);
 		} else {
 			printf("moving into directory\n");
-			copyFile = located(to, )
+			if(located(from, copyFile->entry.entryList)){
+				printf ("mv: %s: File exists in directory.\n", from);
+			} else {
+				struct entryNode * toFile;
+				toFile = malloc(sizeof(struct entryNode));
+			if(toFile == NULL){
+				printf("no memory\n");
+				exit(1);
+			}
+			toFile->name = strdup(from);
+			toFile->entry.contents = strdup(file->entry.contents);
+			toFile->parent = copyFile->entry.entryList;
+			toFile->next = NULL;
+			toFile->isDirectory = FALSE;
+			removeFile(wd, from);
+			addEntry(copyFile, toFile);
+			}
 		}
 		
 	}
